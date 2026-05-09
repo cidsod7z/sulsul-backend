@@ -1,35 +1,38 @@
 name: CI
-on:
+'on':
   pull_request_target:
-    types: [opened, reopened, synchronize, edited]
-
+    types:
+    - opened
+    - reopened
+    - synchronize
+    - edited
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - name: 소스 코드 다운로드
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+    - name: "\uC18C\uC2A4 \uCF54\uB4DC \uB2E4\uC6B4\uB85C\uB4DC"
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+    - name: "JDK \uB2E4\uC6B4\uB85C\uB4DC"
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+    - name: "\uBE4C\uB4DC \uCE90\uC2F1"
+      uses: actions/cache@v3
+      with:
+        path: '~/.gradle/caches
 
-      - name: JDK 다운로드
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
+          ~/.gradle/wrapper
 
-      - name: 빌드 캐싱
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          '
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties')
+          }}
+        restore-keys: '${{ runner.os }}-gradle-
 
-      - name: 린트 체크
-        run: ./gradlew ktlintCheck
-
-      - name: 빌드
-        run: chmod +x gradlew && ./gradlew bootJar
+          '
+    - name: "\uB9B0\uD2B8 \uCCB4\uD06C"
+      run: ./gradlew ktlintCheck
+    - name: "\uBE4C\uB4DC"
+      run: chmod +x gradlew && ./gradlew bootJar
