@@ -1,60 +1,59 @@
 name: CD
-on:
+'on':
   push:
     branches:
-      - test/**
-      - main
-
+    - test/**
+    - main
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - name: 소스 코드 다운로드
-        uses: actions/checkout@v3
+    - name: "\uC18C\uC2A4 \uCF54\uB4DC \uB2E4\uC6B4\uB85C\uB4DC"
+      uses: actions/checkout@v3
+    - name: "JDK \uB2E4\uC6B4\uB85C\uB4DC"
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+    - name: "\uBE4C\uB4DC \uCE90\uC2F1"
+      uses: actions/cache@v3
+      with:
+        path: '~/.gradle/caches
 
-      - name: JDK 다운로드
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
+          ~/.gradle/wrapper
 
-      - name: 빌드 캐싱
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          '
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties')
+          }}
+        restore-keys: '${{ runner.os }}-gradle-
 
-      - name: 린트 체크
-        run: ./gradlew ktlintCheck
+          '
+    - name: "\uB9B0\uD2B8 \uCCB4\uD06C"
+      run: ./gradlew ktlintCheck
+    - name: "\uD604\uC7AC \uC2DC\uAC04 \uAC00\uC838\uC624\uAE30"
+      uses: 1466587594/get-current-time@v2
+      id: current-time
+      with:
+        format: YYYY-MM-DDTHH-mm-ss
+        utcOffset: +09:00
+    - name: "\uBE4C\uB4DC"
+      run: chmod +x gradlew && ./gradlew bootJar
+    - name: "\uBC30\uD3EC \uC555\uCD95 \uD30C\uC77C \uC0DD\uC131"
+      run: 'sed -i ''s/{JASYPT_SECRET}/${{ secrets.JASYPT_SECRET }}/'' ./deploy/Procfile
 
-      - name: 현재 시간 가져오기
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: "+09:00"
+        cp ./sulsul-api/build/libs/application.jar ./deploy
 
-      - name: 빌드
-        run: chmod +x gradlew && ./gradlew bootJar
+        cd deploy && zip -r deploy.zip .
 
-      - name: 배포 압축 파일 생성
-        run: |
-          sed -i 's/{JASYPT_SECRET}/${{ secrets.JASYPT_SECRET }}/' ./deploy/Procfile
-          cp ./sulsul-api/build/libs/application.jar ./deploy
-          cd deploy && zip -r deploy.zip .
-
-      - name: 배포
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-          application_name: sulsul-server-eb-app
-          environment_name: sulsul-server-eb-env
-          version_label: sulsul-${{ vars.GITHUB_SHA }}-${{steps.current-time.outputs.formattedTime}}
-          region: ap-northeast-2
-          deployment_package: ./deploy/deploy.zip
-          wait_for_deployment: false
+        '
+    - name: "\uBC30\uD3EC"
+      uses: einaregilsson/beanstalk-deploy@v21
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+        application_name: sulsul-server-eb-app
+        environment_name: sulsul-server-eb-env
+        version_label: sulsul-${{ vars.GITHUB_SHA }}-${{steps.current-time.outputs.formattedTime}}
+        region: ap-northeast-2
+        deployment_package: ./deploy/deploy.zip
+        wait_for_deployment: false
